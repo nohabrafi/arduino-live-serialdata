@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Live Chart</title>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+</head>
+
+<body>
+    <div id="container"></div>
+
+    <script>
+        let chart;
+        var timer = setInterval(requestData, 1000)
+        var dataold = "";
+
+        // Request data from the server, add it to the graph
+
+        async function requestData() {
+
+            const result = await fetch('./myjsonfile2.json');
+
+            if (result.ok) {
+
+                const data = await result.json();
+
+                if (!(JSON.stringify(dataold) === JSON.stringify(data))) {
+
+                    dataold = data;
+
+                    console.log("data length: " + data.table.length);
+
+                    const date = new Date(data.table[data.table.length - 1].x);
+                    const value = parseInt(data.table[data.table.length - 1].y) * 10;
+
+                    console.log("date: " + date.getTime() + " value: " + value);
+
+                    const point = [date.getTime(), value];
+                    const series = chart.series[0],
+                        shift = series.data.length > 50; // shift if the series is longer than 50
+
+                    // add the point
+                    chart.series[0].addPoint(point, true, false);
+
+                } else {
+                    clearInterval(timer);
+                }
+            }
+        }
+
+
+
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container',
+                defaultSeriesType: 'spline',
+                events: {
+                    load: requestData
+                }
+            },
+            title: {
+                text: 'Live random data'
+            },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150,
+                maxZoom: 20 * 1000
+            },
+            yAxis: {
+                minPadding: 0.2,
+                maxPadding: 0.2,
+                title: {
+                    text: 'Value',
+                    margin: 80
+                }
+            },
+            series: [{
+                name: 'Random data',
+                data: []
+            }]
+        });
+    </script>
+</body>
+
+</html>
