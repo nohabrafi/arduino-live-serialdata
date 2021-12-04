@@ -4,22 +4,18 @@ const fs = require('fs');
 
 var cnt = 0;
 
-if (!(fs.readFile(__dirname + '/dataFromSerial.json', error => { if (error) { console.log(error) } }))) {
+var obj = {
+    table: []
+};
 
-    var obj = {
-        table: []
-    };
+var port;
 
-    var port;
+var json = JSON.stringify(obj);
 
-    var json = JSON.stringify(obj);
-
-    fs.writeFile(__dirname + '/dataFromSerial.json', json, 'utf8', (err) => {
-        if (err) throw err;
-        console.log('The file has been created!');
-    });
-
-}
+fs.writeFile(__dirname + '/dataFromSerial.json', json, 'utf8', (err) => {
+    if (err) throw err;
+    console.log('The file has been created!');
+});
 
 try {
 
