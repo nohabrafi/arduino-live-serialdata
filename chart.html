@@ -8,14 +8,25 @@
 
 <body>
     <div id="container"></div>
-
+    <button>Stop</button>
     <script>
         let chart;
-        var timer = setInterval(requestData, 1000)
+        let timer = setInterval(requestData, 1000);
+        let button = document.querySelector("button");
+
+        button.addEventListener("click", function() {
+            if (button.innerText == "Stop") {
+                clearInterval(timer);
+                button.innerText = "Start";
+            } else {
+                timer = setInterval(requestData, 1000);
+                button.innerText = "Stop";
+            }
+        });
+
         var dataold = "";
 
         // Request data from the server, add it to the graph
-
         async function requestData() {
 
             const result = await fetch('./dataFromSerial.json');
@@ -23,18 +34,18 @@
             if (result.ok) {
 
                 const data = await result.json();
-
+                // check for previos data. if they are the same -> clear interval
                 if (!(JSON.stringify(dataold) === JSON.stringify(data))) {
 
                     dataold = data;
-
+                    // log length
                     console.log("data length: " + data.table.length);
-
+                    // get lastest date and value pair from data
                     const date = new Date(data.table[data.table.length - 1].x);
                     const value = parseInt(data.table[data.table.length - 1].y) * 10;
-
+                    // log it
                     console.log("date: " + date.getTime() + " value: " + value);
-
+                    // create point
                     const point = [date.getTime(), value];
                     const series = chart.series[0],
                         shift = series.data.length > 50; // shift if the series is longer than 50
@@ -47,8 +58,6 @@
                 }
             }
         }
-
-
 
         chart = new Highcharts.Chart({
             chart: {
